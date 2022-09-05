@@ -23,8 +23,8 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Numero Factura</th>
                 <th>Fecha</th>
+                <th>Numero Factura</th>
                 <th>Nombre Cliente</th>
                 <th>Total</th>
                 <th>Acciones</th>
@@ -34,8 +34,8 @@ else
             @foreach (var Factura in FacturasArray)
             {
                 <tr>
-                    <td><span>@Factura.NumeroFactura</span></td>
                     <td><span>@Factura.Fecha.ToShortDateString()</span></td>
+                    <td><span>@Factura.NumeroFactura</span></td>
                     <td><span>@Factura.NombreCliente</span></td>
                     <td><span>@Factura.Total</span></td>
                     <td>
