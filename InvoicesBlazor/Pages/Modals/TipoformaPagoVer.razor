@@ -1,0 +1,33 @@
+﻿@page "/verTipoFormaDePago"
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+
+
+<EditForm Model="tipodepago">
+    <div class="mb-3">
+        <label>Detalle Producto</label>
+        <div>
+            <InputText disabled class="form-control" @bind-Value="tipodepago.TipodePago"></InputText>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public long TiposDePagoId { get; set; }
+
+    private TiposDePago tipodepago { get; set; } = new TiposDePago();
+    private string objectString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        objectString = (await Http.GetFromJsonAsync<GenericResponse>($"/api/TiposDePago/getById/{TiposDePagoId}")).ObjectResponse.ToString();
+        tipodepago = JsonConvert.DeserializeObject<TiposDePago>(objectString);
+
+    }
+}

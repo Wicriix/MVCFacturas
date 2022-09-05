@@ -1,0 +1,133 @@
+﻿@page "/TiposDePago"
+@using InvoicesBlazor.Pages.Modals
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject NavigationManager NavManager
+@inject IJSRuntime js
+
+<h1>Master de Tipos De Pago</h1>
+
+<p>Master para el mantenimiento de tipos de pago.</p>
+
+<Button Color="Color.Secondary" Clicked="ShowModalCreate">
+    <Icon Name="IconName.Add" />
+    Crear
+</Button>
+
+@if (TiposDePagoArray == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre forma de pago</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var TipoDePago in TiposDePagoArray)
+            {
+                <tr>
+                    <td>@TipoDePago.IdTipoDePago</td>
+                    <td>@TipoDePago.TipodePago</td>
+                    <td>
+                        <div class="d-flex justify-content-md-start">
+                            <Button Clicked="@(() => ShowProduct(TipoDePago.IdTipoDePago))">
+                                <Icon Name="IconName.Eye" />
+                            </Button>
+                            <Button Clicked="@(() =>  ShowModalEdit(TipoDePago.IdTipoDePago))">
+                                <Icon Name="IconName.Edit" />
+                            </Button>
+                            <Button Clicked="@(() => Delete(TipoDePago))">
+                                <Icon Name="IconName.Delete" />
+                            </Button>
+
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<TiposDePago> TiposDePagoArray;
+    private string objectString = "";
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        objectString = (await Http.GetFromJsonAsync<GenericResponse>("/api/TiposDePago/All")).ObjectResponse.ToString();
+        TiposDePagoArray = JsonConvert.DeserializeObject<List<TiposDePago>>(objectString);
+    }
+
+    protected async Task Delete(TiposDePago tiposDePago)
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        var confirmacion = await js.InvokeAsync<bool>("confirmar", "confirmar", "seguro que desea borrar este registro", "question");
+        if (confirmacion)
+        {
+            HttpResponseMessage result = await Http.PostAsJsonAsync($"/api/TiposDePago/Delete", tiposDePago);
+            //Luego trabajaremos con el resultado
+            GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task ShowModalCreate()
+    {
+        var formModal = Modal.Show<Crear>("Crear forma de pago");
+        var result = await formModal.Result;
+
+        if (result.Cancelled)
+        {
+            Console.WriteLine("Modal was cancelled");
+        }
+        else
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    void ShowProduct(long TiposDePagoId)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(TipoformaPagoVer.TiposDePagoId), TiposDePagoId);
+
+        Modal.Show<TipoformaPagoVer>("Forma de Pago", parameters);
+    }
+
+    private async Task ShowModalEdit(long TiposDePagoId)
+    {
+
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(Crear.id), TiposDePagoId);
+
+        var formModal = Modal.Show<Crear>("Editar Forma de Pago", parameters);
+        var result = await formModal.Result;
+
+        if (result.Cancelled)
+        {
+            Console.WriteLine("Modal was cancelled");
+        }
+        else
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+}

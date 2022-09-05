@@ -1,0 +1,134 @@
+﻿@page "/Facturas"
+@using InvoicesBlazor.Pages.Modals
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject NavigationManager NavManager
+@inject IJSRuntime js
+
+<h1>Master de Facturas</h1>
+
+<p>Master para el mantenimiento de facturas.</p>
+<button @onclick="crearFacturaModal" class="btn btn-primary">
+    <Icon Name="IconName.Add" />
+    Crear Factura
+</button>
+@if (FacturasArray == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Numero Factura</th>
+                <th>Fecha</th>
+                <th>Nombre Cliente</th>
+                <th>Total</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Factura in FacturasArray)
+            {
+                <tr>
+                    <td><span>@Factura.NumeroFactura</span></td>
+                    <td><span>@Factura.Fecha.ToShortDateString()</span></td>
+                    <td><span>@Factura.NombreCliente</span></td>
+                    <td><span>@Factura.Total</span></td>
+                    <td>
+                        <div class="d-flex justify-content-md-start">
+                            <Button Clicked="@(() => ShowFactura(Factura.IdFacturas))">
+                                <Icon Name="IconName.Eye" />
+                            </Button>
+                            <Button Clicked="@(() => ShowModalEdit(Factura.IdFacturas))">
+                                <Icon Name="IconName.Edit" />
+                            </Button>
+                            <Button Clicked="@(() => Delete(Factura))">
+                                <Icon Name="IconName.Delete" />
+                            </Button>
+
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<FacturasViewModels> FacturasArray;
+    private string objectString = "";
+    [CascadingParameter] public IModalService Modal { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        objectString = (await Http.GetFromJsonAsync<GenericResponse>("/api/Facturas/All")).ObjectResponse.ToString();
+        FacturasArray = JsonConvert.DeserializeObject<List<FacturasViewModels>>(objectString);
+    }
+
+    protected async Task Delete(FacturasViewModels factura)
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        var confirmacion = await js.InvokeAsync<bool>("confirmar", "confirmar", "seguro que desea borrar este registro", "question");
+        if (confirmacion)
+        {
+
+            HttpResponseMessage result = await Http.PostAsJsonAsync($"/api/Facturas/Delete", factura);
+            //Luego trabajaremos con el resultado
+            GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task crearFacturaModal()
+    {
+        var formModal = Modal.Show<CrearFacturas>($"Nueva Factura");
+        var result = await formModal.Result;
+        if (result.Cancelled)
+        {
+            Console.WriteLine("Modal was cancelled");
+        }
+        else
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    void ShowFactura(long FacturaId)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(FacturaVer.FacturaId), FacturaId);
+
+        Modal.Show<FacturaVer>($"Factura ", parameters);
+    }
+
+    private async Task ShowModalEdit(long facturaId)
+    {
+
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(CrearFacturas.id), facturaId);
+
+        var formModal = Modal.Show<CrearFacturas>("Editar Factura ", parameters);
+        var result = await formModal.Result;
+
+        if (result.Cancelled)
+        {
+            Console.WriteLine("Modal was cancelled");
+        }
+        else
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+}

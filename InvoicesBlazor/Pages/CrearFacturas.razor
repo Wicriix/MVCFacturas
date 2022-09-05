@@ -1,0 +1,321 @@
+﻿@page "/crearFactura"
+@page "/EditarFactura/{id:long}"
+
+@using MVCFacturas.Entities.Models
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject NavigationManager NavManager
+
+<EditForm class="form-group" Model="factura">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label ststyle="font-size: 10px">Detalle factura</label>
+        <div class="d-flex justify-content-around">
+            <div>
+                <Label>Numero Factura</Label>
+                <InputNumber class="form-control" @bind-Value="factura.NumeroFactura"></InputNumber>
+                <ValidationMessage For="(()=> factura.NumeroFactura)" />
+            </div>
+            <div>
+                <Label>Fecha</Label>
+                <InputDate readonly class="form-control" @bind-Value="factura.Fecha"></InputDate>
+            </div>
+        </div>
+        <div class="TiposdePago d-flex justify-content-around">
+            <div>
+
+                <Label>Tipo de Pago</Label>
+                @if (ListProducts == null)
+                {
+                    <p><em>Cargando Tipos de pago...</em></p>
+                }
+                else
+                {
+                    <InputSelect class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" @bind-Value="factura.TipodePago">
+                        @foreach (var item in TiposDePagoArray)
+                        {
+                            <option value="@item.TipodePago">@item.TipodePago</option>
+                        }
+                    </InputSelect>
+                }
+            </div>
+            @*"*@
+            <div>
+                <Label>Nombre Cliente</Label>
+                <InputText class="form-control" @bind-Value="factura.NombreCliente"></InputText>
+                <ValidationMessage For=" (()=> factura.NombreCliente)" />
+
+            </div>
+            <div>
+                <Label>Documento Cliente</Label>
+                <InputText class="form-control" @bind-Value="factura.DocumentoCliente"></InputText>
+                <ValidationMessage For="(()=> factura.DocumentoCliente)" />
+
+            </div>
+        </div>
+        <div class="d-flex justify-content-around">
+            <div>
+                <Label>IVA %</Label>
+                <InputNumber class="form-control" min="1" @bind-Value="@factura.IVA"></InputNumber>
+                <ValidationMessage For="(()=> factura.IVA)" />
+            </div>
+            <div>
+                <Label>Descuento %</Label>
+                <InputNumber class="form-control" min="1" @bind-Value="factura.Descuento"></InputNumber>
+                <ValidationMessage For="(()=> factura.Descuento)" />
+            </div>
+        </div>
+        <div class="products d-flex justify-content-around">
+            @if (ListProducts == null)
+            {
+                <p><em>Cargando productos...</em></p>
+            }
+            else
+            {
+                <div>
+                    <Label>Crear Producto</Label>
+                    <InputSelect class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" @bind-Value="ProductoSeleccionado.Id">
+                        @foreach (var item in ListProducts)
+                        {
+                            <option value="@item.IdProducto">@item.Producto</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div>
+                    <Label>Cantidad</Label>
+                    <InputNumber class="form-control" @bind-Value="@ProductoSeleccionado.Cantidad"></InputNumber>
+                    <ValidationMessage For="(()=> ProductoSeleccionado.Cantidad)" />
+                </div>
+
+                <div>
+                    <Label>Precio Unitario</Label>
+                    <InputNumber class="form-control" min="1" @bind-Value="@ProductoSeleccionado.PrecioUnitario"></InputNumber>
+                    <ValidationMessage For="(()=> ProductoSeleccionado.PrecioUnitario)" />
+                </div>
+                <Button disabled="@((ProductoSeleccionado.Cantidad <= 0 || ProductoSeleccionado.Id <=0 ) ?true:false)"
+                    Clicked="@(() => AddProducto())">
+                    Agregar
+                </Button>
+            }
+        </div>
+        <div>
+            <Label>Productos</Label>
+            @if (factura.ProductosFactura.Count <= 0)
+            {
+                <p><em>Sin productos añadidos</em></p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            @if (IsEdit)
+                            {
+                                <th>Eliminar</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in factura.ProductosFactura)
+                        {
+                            <tr>
+                                <td><span>@producto.Producto</span></td>
+                                <td><span>@producto.Cantidad</span></td>
+                                <td>@producto.PrecioUnitario</td>
+                                @if (IsEdit)
+                                {
+                                    <td>
+
+                                        <div class="d-flex justify-content-md-start">
+                                            <Button Clicked="@(() => Remove(producto))">
+                                                <Icon Name="IconName.Times" />
+                                            </Button>
+
+                                        </div>
+
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+        <div class="d-flex justify-content-around">
+            <div>
+                <Label>Total Descuento</Label>
+                <InputNumber readonly class="form-control" @bind-Value="@factura.TotalDescuento"></InputNumber>
+            </div>
+            <div>
+                <Label>Total Impuesto</Label>
+                <InputNumber readonly class="form-control" @bind-Value="@factura.TotalImpuesto"></InputNumber>
+            </div>
+            <div>
+                <Label>Subtotal</Label>
+                <InputNumber readonly class="form-control" @bind-Value="factura.Subtotal"></InputNumber>
+            </div>
+            <div>
+                <Label>Total</Label>
+                <InputNumber readonly class="form-control" @bind-Value="@factura.Total"></InputNumber>
+            </div>
+        </div>
+    </div>
+    <div>
+        <Button Clicked="@calcular">Calcular factura</Button>
+        @if (enviarEnable)
+        {
+            <Button Clicked="@Enviar">Enviar </Button>
+        }
+    </div>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public long? id { get; set; }
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+    private FacturasViewModels factura { get; set; } = new FacturasViewModels();
+    private GenericResponse Response { get; set; } = new GenericResponse();
+    private List<FacturasViewModels> FacturasArray;
+    private List<Productos> ListProducts;
+    private List<TiposDePago> TiposDePagoArray;
+    private ProductoModel ProductoSeleccionado { get; set; } = new ProductoModel();
+
+    protected bool IsDisabled { get; set; }
+    protected bool IsEdit { get; set; }
+    protected bool enviarEnable { get; set; } = false;
+    private string objectString = "";
+    private string titulo = "Crear Facturas";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+
+
+        objectString = (await Http.GetFromJsonAsync<GenericResponse>("/api/Productos/All")).ObjectResponse.ToString();
+        ListProducts = JsonConvert.DeserializeObject<List<Productos>>(objectString);
+
+        objectString = (await Http.GetFromJsonAsync<GenericResponse>("/api/TiposDePago/All")).ObjectResponse.ToString();
+        TiposDePagoArray = JsonConvert.DeserializeObject<List<TiposDePago>>(objectString);
+        factura.TipodePago = TiposDePagoArray.FirstOrDefault().TipodePago ?? null;
+
+
+        if (id is not null)
+        {
+            objectString = (await Http.GetFromJsonAsync<GenericResponse>($"/api/Facturas/getById/{id}")).ObjectResponse.ToString();
+            factura = JsonConvert.DeserializeObject<FacturasViewModels>(objectString);
+            IsEdit = true;
+            titulo = "Editar Factura";
+        }
+        else
+        {
+            IsEdit = false;
+            titulo = "Crear Facturas";
+            factura.Fecha = DateTime.Now;
+        }
+    }
+    protected void Remove(ProductoModel producto)
+    {
+
+        factura.ProductosFactura.Remove(producto);
+        factura.Subtotal = 0;
+        factura.ProductosFactura.ForEach((d) =>
+        {
+            factura.Subtotal += d.PrecioUnitario * d.Cantidad;
+        });
+
+        factura.TotalImpuesto = factura.Subtotal * (factura.IVA / 100);
+        factura.TotalDescuento = factura.Subtotal * (factura.Descuento / 100);
+        factura.Total = factura.Subtotal + factura.TotalImpuesto - factura.TotalDescuento;
+
+    }
+    protected async Task calcular()
+    {
+        enviarEnable = true;
+        factura.Subtotal = 0;
+        factura.ProductosFactura.ForEach((d) =>
+        {
+            factura.Subtotal += d.PrecioUnitario * d.Cantidad;
+        });
+
+        factura.TotalImpuesto = factura.Subtotal * (factura.IVA / 100);
+        factura.TotalDescuento = factura.Subtotal * (factura.Descuento / 100);
+        factura.Total = factura.Subtotal + factura.TotalImpuesto - factura.TotalDescuento;
+        await Task.Delay(10);
+    }
+
+    protected void AddProducto()
+    {
+        factura.ProductosFactura.Add(new ProductoModel
+            {
+                Id = ProductoSeleccionado.Id,
+                Producto = ListProducts.Where(x => x.IdProducto == ProductoSeleccionado.Id).Select(x => x.Producto).FirstOrDefault(),
+                Cantidad = ProductoSeleccionado.Cantidad,
+                PrecioUnitario = ProductoSeleccionado.PrecioUnitario,
+            });
+        factura.Subtotal = 0;
+        factura.ProductosFactura.ForEach((d) =>
+        {
+            factura.Subtotal += d.PrecioUnitario * d.Cantidad;
+        });
+
+        factura.TotalImpuesto = factura.Subtotal * (factura.IVA / 100);
+        factura.TotalDescuento = factura.Subtotal * (factura.Descuento / 100);
+        factura.Total = factura.Subtotal + factura.TotalImpuesto - factura.TotalDescuento;
+    }
+    protected async Task Enviar()
+    {
+        await calcular();
+
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        if (id is not null)
+        {
+
+
+            HttpResponseMessage result = await Http.PutAsJsonAsync($"/api/Facturas/Editar", factura);
+            //Luego trabajaremos con el resultado
+            GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+            if (Response.OperationSucess)
+            {
+                ModalInstance.CloseAsync(ModalResult.Ok($"Form was submitted successfully."));
+                NavManager.NavigateTo("/Facturas");
+            }
+        }
+        else
+        {
+            if (factura.ProductosFactura.Count > 0)
+            {
+
+                HttpResponseMessage result = await Http.PostAsJsonAsync($"/api/Facturas/Crear", factura);
+                //Luego trabajaremos con el resultado
+                GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+
+                if (Response.OperationSucess)
+                {
+                    ModalInstance.CloseAsync(ModalResult.Ok($"Form was submitted successfully."));
+                    NavManager.NavigateTo("/Facturas");
+                }
+            }
+        }
+
+
+        if (Response.OperationSucess)
+        {
+            NavManager.NavigateTo("/Facturas");
+        }
+    }
+}

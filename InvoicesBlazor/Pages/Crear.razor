@@ -1,0 +1,79 @@
+﻿@page "/crear"
+@page "/Editar/{id:long}"
+
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject NavigationManager NavManager
+
+
+<EditForm Model="tiposDePago">
+    <div class="mb-3">
+        <label>Tipo de forma de pago</label>
+        <div>
+            <InputText class="form-control" @bind-Value="tiposDePago.TipodePago"></InputText>
+        </div>
+    </div>
+    <Button Clicked="@Enviar">Enviar </Button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public long? id { get; set; }
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+    private TiposDePago tiposDePago { get; set; } = new TiposDePago();
+    private GenericResponse Response { get; set; } = new GenericResponse();
+    private List<TiposDePago> TiposDePagoArray;
+    private string objectString = "";
+    private string titulo = "Crear";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        if (id is not null)
+        {
+            objectString = (await Http.GetFromJsonAsync<GenericResponse>($"/api/TiposDePago/getById/{id}")).ObjectResponse.ToString();
+            tiposDePago = JsonConvert.DeserializeObject<TiposDePago>(objectString);
+
+            titulo = "Editar";
+        }
+        else
+        {
+            titulo = "Crear";
+        }
+    }
+
+    protected async Task Enviar()
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        if (id is not null)
+        {
+            HttpResponseMessage result = await Http.PutAsJsonAsync($"/api/TiposDePago/Editar", tiposDePago);
+            //Luego trabajaremos con el resultado
+            GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+        }
+        else
+        {
+            HttpResponseMessage result = await Http.PostAsJsonAsync($"/api/TiposDePago/Crear", tiposDePago);
+            //Luego trabajaremos con el resultado
+            GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+        }
+
+
+        if (Response.OperationSucess)
+        {
+            ModalInstance.CloseAsync(ModalResult.Ok($"Form was submitted successfully."));
+            NavManager.NavigateTo("/TiposDePago");
+        }
+    }
+}

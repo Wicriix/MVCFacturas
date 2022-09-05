@@ -1,0 +1,82 @@
+﻿@page "/crearProducto"
+@page "/EditarProducto/{id:long}"
+
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject NavigationManager NavManager
+
+<h2>@titulo Producto</h2>
+
+<EditForm Model="producto">
+    <div class="mb-3">
+        <label>Producto</label>
+        <div>
+            <InputText class="form-control" @bind-Value="producto.Producto"></InputText>
+        </div>
+    </div>
+    <Button Clicked="@Enviar">Enviar </Button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public long? id { get; set; }
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+    private Productos producto { get; set; } = new Productos();
+    private GenericResponse Response { get; set; } = new GenericResponse();
+    private List<Productos> productoArray;
+    private string objectString = "";
+    private string titulo = "Crear";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+
+        if (id is not null)
+        {
+            objectString = (await Http.GetFromJsonAsync<GenericResponse>($"/api/Productos/getById/{id}")).ObjectResponse.ToString();
+            producto = JsonConvert.DeserializeObject<Productos>(objectString);
+
+            titulo = "Editar";
+        }
+        else
+        {
+            titulo = "Crear";
+        }
+    }
+
+    protected async Task Enviar()
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        if (id is not null)
+        {
+            HttpResponseMessage result = await Http.PutAsJsonAsync($"/api/Productos/Editar", producto);
+            //Luego trabajaremos con el resultado
+            GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+        }
+        else
+        {
+            HttpResponseMessage result = await Http.PostAsJsonAsync($"/api/Productos/Crear", producto);
+            //Luego trabajaremos con el resultado
+            GenericResponse Response = await result.Content.ReadFromJsonAsync<GenericResponse>();
+        }
+
+
+        if (Response.OperationSucess)
+        {
+            ModalInstance.CloseAsync(ModalResult.Ok($"Form was submitted successfully."));
+            NavManager.NavigateTo("/Productos");
+        }
+    }
+}

@@ -1,0 +1,13 @@
+﻿.products {
+    display: flex;
+    align-items: center;
+}
+
+.TiposdePago {
+    display: flex;
+    align-items: center;
+}
+
+div {
+    margin-right: 10px;
+}

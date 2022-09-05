@@ -1,0 +1,110 @@
+﻿@page "/verFactura"
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+
+<EditForm Model="factura">
+    <div class="mb-3">
+        <label ststyle="font-size: 10px">Detalle factura</label>
+        <div class="d-flex justify-content-around">
+            <div>
+                <Label>Numero Factura</Label>
+                <InputNumber readonly class="form-control" @bind-Value="factura.NumeroFactura"></InputNumber>
+            </div>
+            <div>
+                <Label>Fecha</Label>
+                <InputDate readonly class="form-control" @bind-Value="factura.Fecha"></InputDate>
+            </div>
+        </div>
+        <div class="d-flex justify-content-around">
+            <div>
+                <Label>Tipo de Pago</Label>
+                <InputText readonly class="form-control" @bind-Value="factura.TipodePago"></InputText>
+            </div>
+            <div>
+                <Label>Nombre Cliente</Label>
+                <InputText readonly class="form-control" @bind-Value="factura.NombreCliente"></InputText>
+            </div>
+            <div>
+                <Label>Documento Cliente</Label>
+                <InputText readonly class="form-control" @bind-Value="factura.DocumentoCliente"></InputText>
+            </div>
+        </div>
+        <div>
+            <Label>Factura</Label>
+            @if (factura.ProductosFactura == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in factura.ProductosFactura)
+                        {
+                            <tr>
+                                <td><span>@producto.Producto</span></td>
+                                <td><span>@producto.Cantidad</span></td>
+                                <td><span>@producto.PrecioUnitario</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+        <div class="d-flex justify-content-around">
+            <div>
+                <Label>IVA</Label>
+                <InputNumber readonly class="form-control" @bind-Value="factura.IVA"></InputNumber>
+            </div>
+            <div>
+                <Label>Descuento</Label>
+                <InputNumber readonly class="form-control" @bind-Value="factura.Descuento"></InputNumber>
+            </div>
+            <div>
+                <Label>Total Descuento</Label>
+                <InputNumber readonly class="form-control" @bind-Value="@factura.TotalDescuento"></InputNumber>
+            </div>
+        </div>
+        <div class="d-flex justify-content-around">
+            <div>
+                <Label>Subtotal</Label>
+                <InputNumber readonly class="form-control" @bind-Value="factura.Subtotal"></InputNumber>
+            </div>
+            <div>
+                <Label>Total Impuesto</Label>
+                <InputNumber readonly class="form-control" @bind-Value="factura.TotalImpuesto"></InputNumber>
+            </div>
+            <div>
+                <Label>Total</Label>
+                <InputNumber readonly class="form-control" @bind-Value="@factura.Total"></InputNumber>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public long FacturaId { get; set; }
+
+    private FacturasViewModels factura { get; set; } = new FacturasViewModels();
+    private string objectString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Http.BaseAddress == null)
+        {
+            Http.BaseAddress = new Uri(Configuration["urlApi"]);
+        }
+        objectString = (await Http.GetFromJsonAsync<GenericResponse>($"/api/Facturas/getById/{FacturaId}")).ObjectResponse.ToString();
+        factura = JsonConvert.DeserializeObject<FacturasViewModels>(objectString);
+
+    }
+}
