@@ -1,7 +1,7 @@
 # MVCFacturas
 
-Hello, GlobalTek!
-Esta es la solución de su prueba Técnica, se realizó como se indicó en el archivo con un modelo MVC aunque decidí separar los proyectos de front y Back, también se realizó como fue requerido la implementación de Base de Datos por CodeFirst usando entity framework, el código se encuentra en mi GitHub en el siguiente link:
+Hello!
+Esta es la solución de prueba, se realizó como se indicó en el archivo con un modelo MVC aunque decidí separar los proyectos de front y Back, también se realizó como fue requerido la implementación de Base de Datos por CodeFirst usando entity framework, el código se encuentra en mi GitHub en el siguiente link:
 
 https://github.com/Wicriix/MVCFacturas
 
