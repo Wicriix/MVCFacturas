@@ -6,53 +6,60 @@
 @inject IConfiguration Configuration
 @inject NavigationManager NavManager
 @inject IJSRuntime js
+<AuthorizeView>
+    <Authorized>
+        <h1>Master de Productos</h1>
 
-<h1>Master de Productos</h1>
+        <p>Master para el mantenimiento de Productos.</p>
+        <button @onclick="ShowModalCreate" class="btn btn-primary">
+            <Icon Name="IconName.Add" />
+            Crear
+        </button>
+        @if (ProductosArray == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nombre del producto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var Producto in ProductosArray)
+                    {
+                        <tr>
+                            <td>@Producto.IdProducto</td>
+                            <td>@Producto.Producto</td>
+                            <td>
+                                <div class="d-flex justify-content-md-start">
+                                    <Button Clicked="@(() => ShowProduct(Producto.IdProducto))">
+                                        <Icon Name="IconName.Eye" />
+                                    </Button>
+                                    <Button Clicked="@(() => ShowModalEdit(Producto.IdProducto))">
+                                        <Icon Name="IconName.Edit" />
+                                    </Button>
+                                    <Button Clicked="@(() => Delete(Producto))">
+                                        <Icon Name="IconName.Delete" />
+                                    </Button>
 
-<p>Master para el mantenimiento de Productos.</p>
-<button @onclick="ShowModalCreate" class="btn btn-primary">
-    <Icon Name="IconName.Add" />
-    Crear
-</button>
-@if (ProductosArray == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nombre del producto</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var Producto in ProductosArray)
-            {
-                <tr>
-                    <td>@Producto.IdProducto</td>
-                    <td>@Producto.Producto</td>
-                    <td>
-                        <div class="d-flex justify-content-md-start">
-                            <Button Clicked="@(() => ShowProduct(Producto.IdProducto))">
-                                <Icon Name="IconName.Eye" />
-                            </Button>
-                            <Button Clicked="@(() => ShowModalEdit(Producto.IdProducto))">
-                                <Icon Name="IconName.Edit" />
-                            </Button>
-                            <Button Clicked="@(() => Delete(Producto))">
-                                <Icon Name="IconName.Delete" />
-                            </Button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
 
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    </Authorized>
+    <NotAuthorized>
+        You're not authorized
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private List<Productos> ProductosArray;
@@ -60,7 +67,7 @@ else
     [CascadingParameter] public IModalService Modal { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        if (Http.BaseAddress ==  null)
+        if (Http.BaseAddress == null)
         {
             Http.BaseAddress = new Uri(Configuration["urlApi"]);
         }

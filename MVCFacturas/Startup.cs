@@ -68,6 +68,7 @@ namespace MVCFacturas
             services.AddTransient(typeof(FacturasService)); 
             services.AddTransient(typeof(TiposDePagoService));
             services.AddTransient(typeof(ProductosService)); 
+            services.AddTransient(typeof(BaxterService)); 
             #endregion
         }
 

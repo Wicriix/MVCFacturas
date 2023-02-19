@@ -1,66 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
 <container class="page">
-    <div class="sidebar">
-        <Bar Breakpoint="Breakpoint.Desktop" NavigationBreakpoint="Breakpoint.Tablet" ThemeContrast="ThemeContrast.Dark"
-             Mode="BarMode.VerticalInline" CollapseMode="BarCollapseMode.Small">
-            <BarToggler />
-            <BarBrand>
-                <BarItem>
-                    <BarLink To="">
-                        <BarIcon IconName="IconName.StickyNote" />
-                        Facturador 
-                    </BarLink>
-                </BarItem>
-            </BarBrand>
-            <BarMenu>
-                <BarStart>
-                    <BarItem>
-                        <BarLink To="">
-                            <BarIcon IconName="IconName.Dashboard" />
-                            Dashboard
-                        </BarLink>
-                    </BarItem>
-                    <BarItem>
-                        <BarLink To="/Facturas" @bind-Visible="uiElementsVisible">
-                            <BarIcon IconName="IconName.Wallet" />
-                            Factura
-                        </BarLink>
-                    </BarItem>
-                    <BarItem>
-                        <BarDropdown @bind-Visible="uiElementsVisible">
-                            <BarDropdownToggle>
-                                <BarIcon IconName="IconName.Wrench" />
-                                Configuracion
-                            </BarDropdownToggle>
-                            <BarDropdownMenu>
-                                <BarDropdownItem To="/Productos">Productos</BarDropdownItem>
-                                <BarDropdownItem To="/TiposDePago">Tipos de Pago</BarDropdownItem>
-                            </BarDropdownMenu>
-                        </BarDropdown>
-                    </BarItem>
-                </BarStart>
-            </BarMenu>
-        </Bar>
-    </div>
-    @code {
-        private bool uiElementsVisible = false;
-        private bool utilitiesVisible = false;
-        private bool extensionsVisible = false;
-        private bool formsVisible = false;
-        private bool datagridVisible = false;
-
-        RenderFragment customIcon =@<img src="../wwwroot/images.png" style="width:32px; height: 32px" />;
-    }
-
+    <LoginDisplay></LoginDisplay>
     <div>
         @Body
     </div>
-    @*    <div class="main">
-    <div class="top-row px-4">
-    <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-    </div>
-
-    </div>*@
-    @*<BlazoredModal/>*@
 </container>

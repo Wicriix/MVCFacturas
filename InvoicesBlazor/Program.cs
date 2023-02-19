@@ -8,6 +8,7 @@ using Blazorise.Material;
 using Blazorise.Icons.Material;
 using Microsoft.JSInterop;
 using Blazored.Modal;
+using Microsoft.Extensions.Configuration;
 
 namespace InvoicesBlazor
 {
@@ -27,7 +28,11 @@ namespace InvoicesBlazor
             .AddMaterialIcons();
             builder.Services.AddBlazoredModal();
             builder.Services.AddScoped(sp => new HttpClient());
-
+            builder.Services.AddMsalAuthentication( opt =>
+            {
+                builder.Configuration.Bind("AzureAd", opt.ProviderOptions.Authentication);
+                opt.ProviderOptions.DefaultAccessTokenScopes.Add("https://graph.microsoft.com/openid");
+            });
             await builder.Build().RunAsync();
         }
     }

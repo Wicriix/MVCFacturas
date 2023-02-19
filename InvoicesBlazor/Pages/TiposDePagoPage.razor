@@ -6,56 +6,61 @@
 @inject IConfiguration Configuration
 @inject NavigationManager NavManager
 @inject IJSRuntime js
+<AuthorizeView>
+    <Authorized>
+        <h1>Master de Tipos De Pago</h1>
 
-<h1>Master de Tipos De Pago</h1>
+        <p>Master para el mantenimiento de tipos de pago.</p>
 
-<p>Master para el mantenimiento de tipos de pago.</p>
+        <Button Color="Color.Secondary" Clicked="ShowModalCreate">
+            <Icon Name="IconName.Add" />
+            Crear
+        </Button>
 
-<Button Color="Color.Secondary" Clicked="ShowModalCreate">
-    <Icon Name="IconName.Add" />
-    Crear
-</Button>
+        @if (TiposDePagoArray == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nombre forma de pago</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var TipoDePago in TiposDePagoArray)
+                    {
+                        <tr>
+                            <td>@TipoDePago.IdTipoDePago</td>
+                            <td>@TipoDePago.TipodePago</td>
+                            <td>
+                                <div class="d-flex justify-content-md-start">
+                                    <Button Clicked="@(() => ShowProduct(TipoDePago.IdTipoDePago))">
+                                        <Icon Name="IconName.Eye" />
+                                    </Button>
+                                    <Button Clicked="@(() =>  ShowModalEdit(TipoDePago.IdTipoDePago))">
+                                        <Icon Name="IconName.Edit" />
+                                    </Button>
+                                    <Button Clicked="@(() => Delete(TipoDePago))">
+                                        <Icon Name="IconName.Delete" />
+                                    </Button>
 
-@if (TiposDePagoArray == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nombre forma de pago</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var TipoDePago in TiposDePagoArray)
-            {
-                <tr>
-                    <td>@TipoDePago.IdTipoDePago</td>
-                    <td>@TipoDePago.TipodePago</td>
-                    <td>
-                        <div class="d-flex justify-content-md-start">
-                            <Button Clicked="@(() => ShowProduct(TipoDePago.IdTipoDePago))">
-                                <Icon Name="IconName.Eye" />
-                            </Button>
-                            <Button Clicked="@(() =>  ShowModalEdit(TipoDePago.IdTipoDePago))">
-                                <Icon Name="IconName.Edit" />
-                            </Button>
-                            <Button Clicked="@(() => Delete(TipoDePago))">
-                                <Icon Name="IconName.Delete" />
-                            </Button>
-
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+    <NotAuthorized>
+        You're not authorized
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private List<TiposDePago> TiposDePagoArray;
