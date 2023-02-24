@@ -20,14 +20,14 @@ builder.Services.AddOidcAuthentication(options =>
     options.ProviderOptions.ClientId = "magic2";
     options.ProviderOptions.DefaultScopes.Add("openid");
     options.ProviderOptions.DefaultScopes.Add("profile");
-    options.ProviderOptions.DefaultScopes.Add("email");
+    options.ProviderOptions.DefaultScopes.Add("magic");
     options.ProviderOptions.RedirectUri = "https://localhost:7194/signin-oidc";
     options.ProviderOptions.PostLogoutRedirectUri = "https://localhost:7194/signout-callback-oidc";
     options.ProviderOptions.ResponseType = OidcConstants.ResponseTypes.Code;
     options.ProviderOptions.ResponseMode = OidcConstants.ResponseModes.Query;
 
 });
-
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 await builder.Build().RunAsync();
 

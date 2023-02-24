@@ -55,7 +55,7 @@ namespace MVCFacturas
                 .AddJwtBearer(options =>
                 {
                     options.Authority = "https://localhost:7267";
-                    options.Audience = "magic";
+                    options.TokenValidationParameters.ValidAudiences = new[] { "magic", "magic2" };
                     options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
                 });
 

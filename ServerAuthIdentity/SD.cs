@@ -74,7 +74,7 @@ namespace ServerAuthIdentity
                     ClientSecrets = { new Secret("secret".Sha256()) },
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
-                    AllowedScopes = { 
+                    AllowedScopes = { "magic",
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email
@@ -82,7 +82,6 @@ namespace ServerAuthIdentity
                     RequireClientSecret = false,
                     RedirectUris = { "https://localhost:7194/signin-oidc" },
                     PostLogoutRedirectUris = { "https://localhost:7194/signout-callback-oidc" },
-                    RequireConsent = true,
                     AllowOfflineAccess = true,
                     AllowAccessTokensViaBrowser = true
                 }
