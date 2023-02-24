@@ -4,11 +4,13 @@ using MVCFacturas.GenericResponseNameSpace;
 using System;
 using System.Threading.Tasks;
 using MVCFacturas.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MVCFacturas.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TiposDePagoController : ControllerBase
     {
         private readonly TiposDePagoService TiposDePagoService;

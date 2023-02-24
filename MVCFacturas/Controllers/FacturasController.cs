@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MVCFacturas.Entities;
 using MVCFacturas.Entities.ViewModels;
 using MVCFacturas.GenericResponseNameSpace;
@@ -13,6 +14,7 @@ namespace MVCFacturas.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FacturasController : ControllerBase
     {
         private readonly FacturasService FacturasService;

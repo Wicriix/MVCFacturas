@@ -1,12 +1,15 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MVCFacturas.ExternalConnections.DbContexts;
 using MVCFacturas.ExternalConnections.GenericRepository;
@@ -14,6 +17,7 @@ using MVCFacturas.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MVCFacturas
@@ -47,6 +51,22 @@ namespace MVCFacturas
 
                 c.EnableAnnotations();
             });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = "https://localhost:7267";
+                    options.Audience = "magic";
+                    options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+                });
+
+            //services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy("ApiScope", policy =>
+            //    {
+            //        policy.RequireAuthenticatedUser();
+            //        policy.RequireClaim("scoper","magic");
+            //    });
+            //});
             services.AddDbContext<MVCFacturasContext>(options =>
             {
                 options.UseSqlServer(
@@ -65,10 +85,10 @@ namespace MVCFacturas
 
             #region servicios 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddTransient(typeof(FacturasService)); 
+            services.AddTransient(typeof(FacturasService));
             services.AddTransient(typeof(TiposDePagoService));
-            services.AddTransient(typeof(ProductosService)); 
-            services.AddTransient(typeof(BaxterService)); 
+            services.AddTransient(typeof(ProductosService));
+            services.AddTransient(typeof(BaxterService));
             #endregion
         }
 
@@ -93,12 +113,12 @@ namespace MVCFacturas
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers().RequireAuthorization(); 
             });
         }
     }
