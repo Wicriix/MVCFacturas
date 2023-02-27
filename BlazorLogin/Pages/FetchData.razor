@@ -8,32 +8,6 @@
 @attribute [Authorize]
 <PageTitle>Weather forecast</PageTitle>
 
-@*@inject AuthenticationStateProvider AuthenticationStateProvider
-@code {
-    string s;
-
-    protected override async Task OnInitializedAsync()
-    {
-
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            var accessToken = await TokenService.GetAccessToken();
-            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await Http.GetAsync("https://localhost:44397/api/Facturas/all");
-            s = await response.Content.ReadAsStringAsync();
-
-        }
-        else
-        {
-            // Redirect to login page if user is not authenticated
-            Navigation.NavigateTo("/login");
-        }
-    }
-
-}*@
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from the server.</p>

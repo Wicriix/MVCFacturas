@@ -51,22 +51,14 @@ namespace MVCFacturas
 
                 c.EnableAnnotations();
             });
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.Authority = "https://localhost:7267";
-                    options.TokenValidationParameters.ValidAudiences = new[] { "magic", "magic2" };
-                    options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
-                });
-
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("ApiScope", policy =>
+            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
             //    {
-            //        policy.RequireAuthenticatedUser();
-            //        policy.RequireClaim("scoper","magic");
+            //        options.Authority = "https://localhost:7267";
+            //        options.TokenValidationParameters.ValidAudiences = new[] { "magic", "magic2" };
+            //        options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
             //    });
-            //});
+
             services.AddDbContext<MVCFacturasContext>(options =>
             {
                 options.UseSqlServer(
@@ -113,12 +105,14 @@ namespace MVCFacturas
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseAuthentication();
+            //app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers().RequireAuthorization(); 
+                endpoints.MapControllers()
+                //.RequireAuthorization()
+                ; 
             });
         }
     }

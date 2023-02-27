@@ -10,7 +10,7 @@ namespace MVCFacturas.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class TiposDePagoController : ControllerBase
     {
         private readonly TiposDePagoService TiposDePagoService;
